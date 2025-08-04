@@ -1,0 +1,93 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { courses, departments, levels } from '@/lib/data';
+import { MoreHorizontal } from 'lucide-react';
+
+export default function LecturerDashboard() {
+  const router = useRouter();
+
+  const handleSetExam = (courseId: string) => {
+    router.push(`/lecturer/exam/create?courseId=${courseId}`);
+  };
+
+  const handleViewResults = (courseId: string) => {
+    router.push(`/lecturer/results/${courseId}`);
+  };
+
+  return (
+    <div className="flex flex-col gap-8">
+      <header>
+        <h1 className="font-headline text-3xl font-bold tracking-tight">Welcome, Dr. Smith!</h1>
+        <p className="text-muted-foreground">Here are the courses assigned to you.</p>
+      </header>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>My Courses</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Course Code</TableHead>
+                <TableHead>Course Title</TableHead>
+                <TableHead>Department</TableHead>
+                <TableHead>Level</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {courses.map((course) => (
+                <TableRow key={course.id}>
+                  <TableCell className="font-medium">{course.code}</TableCell>
+                  <TableCell>{course.title}</TableCell>
+                  <TableCell>
+                    {departments.find((d) => d.id === course.departmentId)?.name}
+                  </TableCell>
+                  <TableCell>
+                    {levels.find((l) => l.value === course.level)?.label}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Open menu</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleSetExam(course.id)}>
+                          Set Exam
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleViewResults(course.id)}>
+                          View Results
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
