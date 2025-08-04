@@ -3,7 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'Online Examination System',
+  title: 'ACAEXAM',
   description: 'An online examination system.',
 };
 
