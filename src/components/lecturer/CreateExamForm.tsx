@@ -32,10 +32,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { courses, departments } from '@/lib/data';
-import type { Question } from '@/lib/types';
 import { PlusCircle, Trash2 } from 'lucide-react';
 import { Checkbox } from '../ui/checkbox';
-import { Separator } from '../ui/separator';
 
 const questionSchema = z.object({
   questionText: z.string().min(1, 'Question text is required.'),
@@ -93,7 +91,24 @@ export default function CreateExamForm() {
   };
 
   function onSubmit(values: ExamFormValues) {
-    console.log(values);
+    const courseDetails = courses.find(c => c.id === values.course);
+    if (!courseDetails) {
+        toast({
+            title: 'Error',
+            description: 'Selected course not found.',
+            variant: 'destructive',
+        });
+        return;
+    }
+
+    const examData = {
+        ...values,
+        courseCode: courseDetails.code,
+        courseTitle: courseDetails.title,
+    };
+    
+    localStorage.setItem(`exam_${values.course}`, JSON.stringify(examData));
+    
     toast({
       title: 'Exam Created Successfully!',
       description: 'The exam has been set and is ready for students.',
@@ -161,9 +176,9 @@ export default function CreateExamForm() {
                 control={form.control}
                 name="departments"
                 render={() => (
-                    <FormItem>
+                    <FormItem className="md:col-span-2">
                     <FormLabel>Departments</FormLabel>
-                    <div className="space-y-2 rounded-md border p-4">
+                    <div className="space-y-2 rounded-md border p-4 grid grid-cols-2 md:grid-cols-3">
                         {departments.map((dep) => (
                             <FormField
                             key={dep.id}

@@ -1,3 +1,6 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import {
   Table,
   TableBody,
@@ -10,13 +13,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { courses } from '@/lib/data';
 import { Badge } from '@/components/ui/badge';
 
-const mockResults = [
-  { name: 'John Doe', reg: '2021/12345', score: 85, grade: 'A' },
-  { name: 'Jane Smith', reg: '2021/54321', score: 72, grade: 'B' },
-  { name: 'Peter Jones', reg: '2021/67890', score: 45, grade: 'D' },
-  { name: 'Mary Brown', reg: '2021/09876', score: 91, grade: 'A' },
-  { name: 'David Green', reg: '2021/11223', score: 65, grade: 'C' },
-];
+type Result = {
+    name: string;
+    reg: string;
+    score: number;
+    grade: string;
+};
 
 function getGradeVariant(grade: string) {
     switch(grade) {
@@ -30,6 +32,14 @@ function getGradeVariant(grade: string) {
 
 export default function ResultsPage({ params }: { params: { courseId: string } }) {
   const course = courses.find((c) => c.id === params.courseId);
+  const [results, setResults] = useState<Result[]>([]);
+
+  useEffect(() => {
+    const storedResults = localStorage.getItem(`results_${params.courseId}`);
+    if (storedResults) {
+      setResults(JSON.parse(storedResults));
+    }
+  }, [params.courseId]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -50,21 +60,29 @@ export default function ResultsPage({ params }: { params: { courseId: string } }
                 <TableRow>
                     <TableHead>Student Name</TableHead>
                     <TableHead>Registration No.</TableHead>
-                    <TableHead>Score</TableHead>
+                    <TableHead>Score (%)</TableHead>
                     <TableHead>Grade</TableHead>
                 </TableRow>
                 </TableHeader>
                 <TableBody>
-                {mockResults.map((result) => (
-                    <TableRow key={result.reg}>
-                    <TableCell className="font-medium">{result.name}</TableCell>
-                    <TableCell>{result.reg}</TableCell>
-                    <TableCell>{result.score}</TableCell>
-                    <TableCell>
-                        <Badge variant={getGradeVariant(result.grade)}>{result.grade}</Badge>
-                    </TableCell>
+                {results.length > 0 ? (
+                    results.map((result) => (
+                        <TableRow key={result.reg}>
+                        <TableCell className="font-medium">{result.name}</TableCell>
+                        <TableCell>{result.reg}</TableCell>
+                        <TableCell>{result.score}</TableCell>
+                        <TableCell>
+                            <Badge variant={getGradeVariant(result.grade)}>{result.grade}</Badge>
+                        </TableCell>
+                        </TableRow>
+                    ))
+                ) : (
+                    <TableRow>
+                        <TableCell colSpan={4} className="text-center">
+                            No results found for this course yet.
+                        </TableCell>
                     </TableRow>
-                ))}
+                )}
                 </TableBody>
             </Table>
         </CardContent>
