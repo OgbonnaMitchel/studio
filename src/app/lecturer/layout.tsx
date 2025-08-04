@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
-import { LayoutDashboard, BookPlus, ClipboardList } from 'lucide-react';
-import DashboardLayout, { type NavItem } from '@/components/shared/DashboardLayout';
-import type { IconName } from '@/components/shared/DashboardLayout';
+import type { NavItem, IconName } from '@/components/shared/DashboardLayout';
+import DashboardLayout from '@/components/shared/DashboardLayout';
 
 const navItems: NavItem<IconName>[] = [
   { href: '/lecturer/dashboard', label: 'Dashboard', icon: 'LayoutDashboard' },
