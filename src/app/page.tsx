@@ -37,7 +37,7 @@ export default function Home() {
             <div className="p-4 bg-primary/10 rounded-full mb-4">
               <UserSquare className="w-10 h-10 text-primary" />
             </div>
-            <CardTitle className="font-headline text-2xl">Administrator Portal</CardTitle>
+            <CardTitle className="font-headline text-2xl">Lecturer Portal</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col items-center text-center gap-4">
             <p className="text-muted-foreground">
@@ -63,7 +63,7 @@ export default function Home() {
       </div>
        <div className="absolute bottom-4 text-center w-full">
             <Button asChild variant="link" className="text-muted-foreground">
-              <Link href="/admin/manage-data">General Admin</Link>
+              <Link href="/admin/login">General Admin</Link>
             </Button>
         </div>
     </main>
