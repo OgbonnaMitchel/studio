@@ -29,6 +29,21 @@ import {
 } from '@/lib/data';
 import type { Course } from '@/lib/types';
 
+type NewCourseState = {
+  code: string;
+  title: string;
+  level: string;
+  departmentIds: string[];
+};
+
+const initialNewCourseState: NewCourseState = { 
+    code: '', 
+    title: '', 
+    level: '', 
+    departmentIds: [],
+};
+
+
 export default function DataManagementTabs() {
   const [departments, setDepartments] = useState(initialDepartments);
   const [courses, setCourses] = useState(initialCourses);
@@ -36,10 +51,7 @@ export default function DataManagementTabs() {
 
   const [newDepartment, setNewDepartment] = useState('');
   
-  const initialNewCourseState = { 
-      code: '', title: '', level: 0, departmentIds: [] as string[]
-  };
-  const [newCourse, setNewCourse] = useState(initialNewCourseState);
+  const [newCourse, setNewCourse] = useState<NewCourseState>(initialNewCourseState);
 
   const [newLevel, setNewLevel] = useState({ value: '', label: '' });
 
@@ -54,7 +66,8 @@ export default function DataManagementTabs() {
     if (newCourse.code.trim() && newCourse.title.trim() && newCourse.level && newCourse.departmentIds.length > 0) {
         const courseToAdd: Course = { 
             ...newCourse, 
-            id: String(Date.now()), 
+            id: String(Date.now()),
+            level: Number(newCourse.level),
             departmentId: newCourse.departmentIds.join(','),
         };
         setCourses([...courses, courseToAdd]);
@@ -63,9 +76,13 @@ export default function DataManagementTabs() {
   };
 
   const handleAddLevel = () => {
-    if (newLevel.value.trim() && newLevel.label.trim()) {
-        setLevels([...levels, { ...newLevel, id: String(Date.now()), value: parseInt(newLevel.value, 10) }]);
-        setNewLevel({ value: '', label: '' });
+    const levelValue = newLevel.value.trim();
+    if (levelValue && newLevel.label.trim()) {
+        const parsedValue = parseInt(levelValue, 10);
+        if (!isNaN(parsedValue)) {
+            setLevels([...levels, { ...newLevel, id: String(Date.now()), value: parsedValue }]);
+            setNewLevel({ value: '', label: '' });
+        }
     }
   };
 
@@ -122,7 +139,7 @@ export default function DataManagementTabs() {
                         value={newCourse.title}
                         onChange={(e) => setNewCourse({...newCourse, title: e.target.value})}
                     />
-                    <Select onValueChange={(value) => setNewCourse({...newCourse, level: Number(value)})}>
+                    <Select onValueChange={(value) => setNewCourse({...newCourse, level: value})} value={newCourse.level}>
                         <SelectTrigger>
                             <SelectValue placeholder="Select level" />
                         </SelectTrigger>

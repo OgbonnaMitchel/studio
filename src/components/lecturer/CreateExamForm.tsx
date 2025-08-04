@@ -185,7 +185,7 @@ export default function CreateExamForm() {
                             control={form.control}
                             name="departments"
                             render={({ field }) => (
-                                <FormItem key={dep.id} className="flex items-center space-x-3 space-y-0">
+                                <FormItem className="flex items-center space-x-3 space-y-0">
                                 <FormControl>
                                     <Checkbox
                                     checked={field.value.includes(dep.id)}
@@ -272,21 +272,22 @@ export default function CreateExamForm() {
                             name={`questions.${index}.questionText`}
                             render={({ field }) => (
                                 <FormItem>
+                                    <FormLabel>Question</FormLabel>
                                     <FormControl><Input placeholder="Enter question text" {...field} /></FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
                         />
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {[0, 1, 2, 3].map(optIndex => (
+                            {(['A', 'B', 'C', 'D'] as const).map((option, optIndex) => (
                                 <FormField
                                     key={optIndex}
                                     control={form.control}
                                     name={`questions.${index}.options.${optIndex}`}
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Option {String.fromCharCode(65 + optIndex)}</FormLabel>
-                                            <FormControl><Input placeholder={`Option ${String.fromCharCode(65 + optIndex)}`} {...field} /></FormControl>
+                                            <FormLabel>Option {option}</FormLabel>
+                                            <FormControl><Input placeholder={`Option ${option}`} {...field} /></FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -317,7 +318,9 @@ export default function CreateExamForm() {
                 <Button type="button" variant="outline" onClick={handleAddQuestion} className="w-full">
                     <PlusCircle className="mr-2 h-4 w-4" /> Add Question
                 </Button>
-                <FormMessage>{form.formState.errors.questions?.message}</FormMessage>
+                {form.formState.errors.questions && (
+                  <p className="text-sm font-medium text-destructive">{form.formState.errors.questions.message}</p>
+                )}
             </CardContent>
         </Card>
 
