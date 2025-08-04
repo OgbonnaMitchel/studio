@@ -36,8 +36,8 @@ export default function DataManagementTabs() {
 
   const [newDepartment, setNewDepartment] = useState('');
   
-  const initialNewCourseState: Omit<Course, 'id'> & { departmentIds: string[] } = { 
-      code: '', title: '', level: 0, departmentIds: [], departmentId: ''
+  const initialNewCourseState = { 
+      code: '', title: '', level: 0, departmentIds: [] as string[]
   };
   const [newCourse, setNewCourse] = useState(initialNewCourseState);
 
@@ -52,12 +52,10 @@ export default function DataManagementTabs() {
 
   const handleAddCourse = () => {
     if (newCourse.code.trim() && newCourse.title.trim() && newCourse.level && newCourse.departmentIds.length > 0) {
-        // In a real app, you would handle the departmentIds array appropriately.
-        // For this mock, we'll just join them into the single departmentId string.
         const courseToAdd: Course = { 
             ...newCourse, 
             id: String(Date.now()), 
-            departmentId: newCourse.departmentIds.join(','), // Mocking storage of multiple IDs
+            departmentId: newCourse.departmentIds.join(','),
         };
         setCourses([...courses, courseToAdd]);
         setNewCourse(initialNewCourseState);
@@ -83,7 +81,7 @@ export default function DataManagementTabs() {
           <CardHeader>
             <CardTitle>Manage Departments</CardTitle>
             <CardDescription>Add or view system departments.</CardDescription>
-          </Header>
+          </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex gap-2">
               <Input
@@ -149,7 +147,7 @@ export default function DataManagementTabs() {
                                             departmentIds: checked 
                                                 ? [...prev.departmentIds, dep.id]
                                                 : prev.departmentIds.filter(id => id !== dep.id)
-                                        }))
+                                        }));
                                     }}
                                 />
                                 <Label htmlFor={`dep-${dep.id}`} className="font-normal">{dep.name}</Label>
