@@ -3,7 +3,7 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import type { LucideIcon } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { LogOut, User, PanelLeft } from 'lucide-react';
 import AppLogo from './AppLogo';
 import { Button } from '@/components/ui/button';
@@ -29,10 +29,12 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useToast } from '@/hooks/use-toast';
 
-export type NavItem = {
+export type IconName = keyof typeof LucideIcons;
+
+export type NavItem<T extends IconName = IconName> = {
   href: string;
   label: string;
-  icon: LucideIcon;
+  icon: T;
 };
 
 type DashboardLayoutProps = {
@@ -41,6 +43,13 @@ type DashboardLayoutProps = {
   userName: string;
   userRole: string;
 };
+
+const Icon = ({ name, ...props }: { name: IconName } & React.ComponentProps<"svg">) => {
+  const LucideIcon = LucideIcons[name] as React.ElementType;
+  if (!LucideIcon) return null;
+  return <LucideIcon {...props} />;
+};
+
 
 export default function DashboardLayout({
   children,
@@ -79,7 +88,7 @@ export default function DashboardLayout({
                     tooltip={item.label}
                   >
                     <Link href={item.href}>
-                      <item.icon />
+                      <Icon name={item.icon} />
                       <span>{item.label}</span>
                     </Link>
                   </SidebarMenuButton>
