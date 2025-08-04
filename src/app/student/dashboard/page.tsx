@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,18 @@ import { ArrowRight } from 'lucide-react';
 
 export default function StudentDashboard() {
   const [selectedCourse, setSelectedCourse] = useState('');
+  const [userName, setUserName] = useState('Student');
   const router = useRouter();
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      if (user.role === 'Student') {
+        setUserName(user.name);
+      }
+    }
+  }, []);
 
   const handleStartExam = () => {
     if (selectedCourse) {
@@ -21,7 +32,7 @@ export default function StudentDashboard() {
   return (
     <div className="flex flex-col gap-8">
       <header>
-        <h1 className="font-headline text-3xl font-bold tracking-tight">Welcome, John Doe!</h1>
+        <h1 className="font-headline text-3xl font-bold tracking-tight">Welcome, {userName}!</h1>
         <p className="text-muted-foreground">Select a course to begin your examination.</p>
       </header>
 

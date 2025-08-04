@@ -37,12 +37,25 @@ export default function StudentLoginForm() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+    const storedUser = localStorage.getItem(`student_${values.regNumber}`);
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      if (user.password === values.password) {
+        localStorage.setItem('currentUser', JSON.stringify({ ...user, role: 'Student' }));
+        toast({
+          title: 'Login Successful',
+          description: 'Redirecting to your dashboard...',
+        });
+        router.push('/student/dashboard');
+        return;
+      }
+    }
+
     toast({
-      title: 'Login Successful',
-      description: 'Redirecting to your dashboard...',
+        title: 'Login Failed',
+        description: 'Invalid credentials or user not found.',
+        variant: 'destructive',
     });
-    router.push('/student/dashboard');
   }
 
   return (

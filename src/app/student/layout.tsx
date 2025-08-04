@@ -1,4 +1,6 @@
-import type { ReactNode } from 'react';
+'use client';
+
+import { useState, useEffect, type ReactNode } from 'react';
 import { LayoutDashboard, BookOpenCheck } from 'lucide-react';
 import DashboardLayout, { type NavItem } from '@/components/shared/DashboardLayout';
 import type { IconName } from '@/components/shared/DashboardLayout';
@@ -9,10 +11,22 @@ const navItems: NavItem<IconName>[] = [
 ];
 
 export default function StudentPortalLayout({ children }: { children: ReactNode }) {
+  const [userName, setUserName] = useState('Student');
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      if (user.role === 'Student') {
+        setUserName(user.name);
+      }
+    }
+  }, []);
+
   return (
     <DashboardLayout
       navItems={navItems}
-      userName="John Doe"
+      userName={userName}
       userRole="Student"
     >
       {children}

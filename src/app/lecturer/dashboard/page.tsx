@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Table,
@@ -22,6 +23,18 @@ import { MoreHorizontal } from 'lucide-react';
 
 export default function LecturerDashboard() {
   const router = useRouter();
+  const [userName, setUserName] = useState('Lecturer');
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      if (user.role === 'Lecturer') {
+        setUserName(user.name);
+      }
+    }
+  }, []);
+
 
   const handleSetExam = (courseId: string) => {
     router.push(`/lecturer/exam/create?courseId=${courseId}`);
@@ -34,7 +47,7 @@ export default function LecturerDashboard() {
   return (
     <div className="flex flex-col gap-8">
       <header>
-        <h1 className="font-headline text-3xl font-bold tracking-tight">Welcome, Dr. Smith!</h1>
+        <h1 className="font-headline text-3xl font-bold tracking-tight">Welcome, {userName}!</h1>
         <p className="text-muted-foreground">Here are the courses assigned to you.</p>
       </header>
 

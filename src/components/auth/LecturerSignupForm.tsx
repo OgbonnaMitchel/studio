@@ -46,6 +46,9 @@ export default function LecturerSignupForm() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log(values);
+    // In a real app, you'd save this to a database.
+    // For this demo, we'll use localStorage to simulate user accounts.
+    localStorage.setItem(`lecturer_${values.lecturerId}`, JSON.stringify(values));
     toast({
         title: 'Registration Successful',
         description: 'You can now log in with your credentials.',
