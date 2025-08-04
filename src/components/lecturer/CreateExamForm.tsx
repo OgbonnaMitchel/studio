@@ -32,7 +32,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { courses, departments } from '@/lib/data';
-import AiQuestionGenerator from './AiQuestionGenerator';
 import type { Question } from '@/lib/types';
 import { PlusCircle, Trash2 } from 'lucide-react';
 import { Checkbox } from '../ui/checkbox';
@@ -80,7 +79,7 @@ export default function CreateExamForm() {
     },
   });
 
-  const { fields, append, remove, replace } = useFieldArray({
+  const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: 'questions',
   });
@@ -91,20 +90,6 @@ export default function CreateExamForm() {
       options: ['', '', '', ''],
       correctAnswer: 'A',
     });
-  };
-
-  const handleQuestionsGenerated = (generatedQuestions: Question[]) => {
-    const formattedQuestions = generatedQuestions.map((q) => ({
-      questionText: q.questionText,
-      options: [
-        q.options[0]?.substring(3) || '',
-        q.options[1]?.substring(3) || '',
-        q.options[2]?.substring(3) || '',
-        q.options[3]?.substring(3) || '',
-      ] as [string, string, string, string],
-      correctAnswer: q.correctAnswer as 'A' | 'B' | 'C' | 'D',
-    }));
-    replace(formattedQuestions);
   };
 
   function onSubmit(values: ExamFormValues) {
@@ -254,10 +239,9 @@ export default function CreateExamForm() {
                     <div>
                         <CardTitle className="font-headline">Exam Questions</CardTitle>
                         <CardDescription>
-                        Add questions manually or use AI to generate them.
+                        Add questions manually for the exam.
                         </CardDescription>
                     </div>
-                    <AiQuestionGenerator onQuestionsGenerated={handleQuestionsGenerated} />
                 </div>
             </CardHeader>
             <CardContent className="space-y-6">
