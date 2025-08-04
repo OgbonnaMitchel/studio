@@ -199,7 +199,7 @@ export default function DataManagementTabs() {
           <CardHeader>
             <CardTitle>Manage Levels</CardTitle>
             <CardDescription>Add or view system levels.</CardDescription>
-          </Header>
+          </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex gap-2">
               <Input
