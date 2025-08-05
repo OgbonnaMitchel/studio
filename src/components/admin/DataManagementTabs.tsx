@@ -28,6 +28,18 @@ import {
   levels as initialLevels,
 } from '@/lib/data';
 import type { Course, Department, Level } from '@/lib/types';
+import { Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '../ui/alert-dialog';
 
 type NewCourseState = {
   code: string;
@@ -59,6 +71,12 @@ export default function DataManagementTabs() {
     }
   };
 
+  const handleRemoveDepartment = (id: string) => {
+    setDepartments(departments.filter((dep) => dep.id !== id));
+    // Also remove courses associated with this department
+    setCourses(courses.filter((course) => course.departmentId !== id));
+  };
+
   const handleAddCourse = () => {
     if (newCourse.code.trim() && newCourse.title.trim() && newCourse.level && newCourse.departmentIds.length > 0) {
       const newCoursesToAdd: Course[] = newCourse.departmentIds.map(depId => ({
@@ -73,6 +91,11 @@ export default function DataManagementTabs() {
       setNewCourse(initialNewCourseState);
     }
   };
+
+  const handleRemoveCourse = (id: string) => {
+    setCourses(courses.filter((course) => course.id !== id));
+  };
+
 
   const handleAddLevel = () => {
     const levelValue = newLevel.value.trim();
@@ -90,6 +113,11 @@ export default function DataManagementTabs() {
     }
   };
 
+  const handleRemoveLevel = (id: string) => {
+    setLevels(levels.filter((level) => level.id !== id));
+  };
+
+
   return (
     <Tabs defaultValue="departments" className="w-full">
       <TabsList className="grid w-full grid-cols-3">
@@ -101,7 +129,7 @@ export default function DataManagementTabs() {
         <Card>
           <CardHeader>
             <CardTitle>Manage Departments</CardTitle>
-            <CardDescription>Add or view system departments.</CardDescription>
+            <CardDescription>Add or remove system departments.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex gap-2">
@@ -113,10 +141,35 @@ export default function DataManagementTabs() {
               <Button onClick={handleAddDepartment}>Add</Button>
             </div>
             <Table>
-              <TableHeader><TableRow><TableHead>Department Name</TableHead></TableRow></TableHeader>
+              <TableHeader><TableRow><TableHead>Department Name</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
               <TableBody>
                 {departments.map((dep) => (
-                  <TableRow key={dep.id}><TableCell>{dep.name}</TableCell></TableRow>
+                  <TableRow key={dep.id}>
+                    <TableCell>{dep.name}</TableCell>
+                    <TableCell className="text-right">
+                       <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                              <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This action cannot be undone. This will permanently delete the department and all associated courses.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleRemoveDepartment(dep.id)} className="bg-destructive hover:bg-destructive/90">
+                                    Delete
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                       </AlertDialog>
+                    </TableCell>
+                  </TableRow>
                 ))}
               </TableBody>
             </Table>
@@ -127,7 +180,7 @@ export default function DataManagementTabs() {
         <Card>
           <CardHeader>
             <CardTitle>Manage Courses</CardTitle>
-            <CardDescription>Add or view system courses.</CardDescription>
+            <CardDescription>Add or remove system courses.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-4 p-4 border rounded-lg">
@@ -179,7 +232,7 @@ export default function DataManagementTabs() {
               <Button onClick={handleAddCourse} className="w-full">Add Course</Button>
             </div>
             <Table>
-              <TableHeader><TableRow><TableHead>Code</TableHead><TableHead>Title</TableHead><TableHead>Level</TableHead><TableHead>Department</TableHead></TableRow></TableHeader>
+              <TableHeader><TableRow><TableHead>Code</TableHead><TableHead>Title</TableHead><TableHead>Level</TableHead><TableHead>Department</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
               <TableBody>
                 {courses.map((c) => (
                   <TableRow key={c.id}>
@@ -187,6 +240,29 @@ export default function DataManagementTabs() {
                     <TableCell>{c.title}</TableCell>
                     <TableCell>{levels.find(l => l.value === c.level)?.label}</TableCell>
                     <TableCell>{departments.find(d => d.id === c.departmentId)?.name}</TableCell>
+                     <TableCell className="text-right">
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                              <AlertDialogHeader>
+                                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                      This action cannot be undone. This will permanently delete the course.
+                                  </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleRemoveCourse(c.id)} className="bg-destructive hover:bg-destructive/90">
+                                      Delete
+                                  </AlertDialogAction>
+                              </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -198,7 +274,7 @@ export default function DataManagementTabs() {
         <Card>
           <CardHeader>
             <CardTitle>Manage Levels</CardTitle>
-            <CardDescription>Add or view system levels.</CardDescription>
+            <CardDescription>Add or remove system levels.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex gap-2">
@@ -216,10 +292,35 @@ export default function DataManagementTabs() {
               <Button onClick={handleAddLevel}>Add</Button>
             </div>
             <Table>
-              <TableHeader><TableRow><TableHead>Level</TableHead></TableRow></TableHeader>
+              <TableHeader><TableRow><TableHead>Level</TableHead><TableHead className="text-right">Actions</TableHead></TableRow></TableHeader>
               <TableBody>
                 {levels.map((l) => (
-                  <TableRow key={l.id}><TableCell>{l.label}</TableCell></TableRow>
+                  <TableRow key={l.id}>
+                    <TableCell>{l.label}</TableCell>
+                    <TableCell className="text-right">
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                              <AlertDialogHeader>
+                                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                      This action cannot be undone. This will permanently delete the level.
+                                  </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleRemoveLevel(l.id)} className="bg-destructive hover:bg-destructive/90">
+                                      Delete
+                                  </AlertDialogAction>
+                              </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                    </TableCell>
+                  </TableRow>
                 ))}
               </TableBody>
             </Table>
