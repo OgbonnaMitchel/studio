@@ -6,11 +6,11 @@ import type { ReactNode } from 'react';
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="sticky top-0 z-50 w-full border-b bg-card">
+      <header className="sticky top-0 z-50 w-full border-b bg-primary text-primary-foreground">
         <div className="container flex h-16 items-center justify-between">
           <AppLogo />
           <nav>
-            <Button asChild variant="ghost">
+            <Button asChild variant="ghost" className="hover:bg-primary/80 focus-visible:ring-offset-primary">
                 <Link href="/">Exit Admin</Link>
             </Button>
           </nav>

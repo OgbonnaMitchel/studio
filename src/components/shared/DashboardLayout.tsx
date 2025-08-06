@@ -109,12 +109,12 @@ export default function DashboardLayout({
         </Sidebar>
 
         <main className="flex-1">
-          <header className="flex h-16 items-center justify-between border-b bg-card px-4 md:px-6">
-             <SidebarTrigger className="md:hidden" />
+          <header className="flex h-16 items-center justify-between border-b bg-primary text-primary-foreground px-4 md:px-6">
+             <SidebarTrigger className="md:hidden hover:bg-primary/80 focus-visible:ring-offset-primary" />
             <div className="flex items-center gap-4 ml-auto">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+                  <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-primary/80 focus-visible:ring-offset-primary">
                     <Avatar>
                       <AvatarImage src={`https://placehold.co/100x100.png`} alt={userName} />
                       <AvatarFallback>{userName.charAt(0).toUpperCase()}</AvatarFallback>
