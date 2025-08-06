@@ -1,7 +1,9 @@
+
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
+import html2canvas from 'html2canvas';
 import {
   Table,
   TableBody,
@@ -13,6 +15,9 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { courses } from '@/lib/data';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Download } from 'lucide-react';
+import type { Course } from '@/lib/types';
 
 type Result = {
     name: string;
@@ -34,10 +39,15 @@ function getGradeVariant(grade: string) {
 export default function ResultsPage() {
   const params = useParams();
   const courseId = Array.isArray(params.courseId) ? params.courseId[0] : params.courseId;
-  const course = courses.find((c) => c.id === courseId);
+  const [course, setCourse] = useState<Course | undefined>();
   const [results, setResults] = useState<Result[]>([]);
+  const resultsTableRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const storedCourses = localStorage.getItem('courses');
+    const allCourses = storedCourses ? JSON.parse(storedCourses) : courses;
+    setCourse(allCourses.find((c: Course) => c.id === courseId));
+
     if (courseId) {
       const storedResults = localStorage.getItem(`results_${courseId}`);
       if (storedResults) {
@@ -45,16 +55,33 @@ export default function ResultsPage() {
       }
     }
   }, [courseId]);
+  
+  const handlePrintResults = () => {
+    if (resultsTableRef.current) {
+        html2canvas(resultsTableRef.current).then((canvas) => {
+            const link = document.createElement('a');
+            link.href = canvas.toDataURL('image/png');
+            link.download = `exam-results-${course?.code}.png`;
+            link.click();
+        });
+    }
+  };
 
   return (
     <div className="flex flex-col gap-8">
-      <header>
-        <h1 className="font-headline text-3xl font-bold tracking-tight">Exam Results</h1>
-        <p className="text-muted-foreground">
-          Showing results for: {course?.code} - {course?.title || 'Unknown Course'}
-        </p>
+      <header className='flex justify-between items-center'>
+        <div>
+            <h1 className="font-headline text-3xl font-bold tracking-tight">Exam Results</h1>
+            <p className="text-muted-foreground">
+            Showing results for: {course?.code} - {course?.title || 'Unknown Course'}
+            </p>
+        </div>
+        <Button onClick={handlePrintResults} disabled={results.length === 0}>
+            <Download className="mr-2 h-4 w-4" />
+            Print Results
+        </Button>
       </header>
-      <Card>
+      <Card ref={resultsTableRef} className="p-4">
         <CardHeader>
             <CardTitle>Student Scores</CardTitle>
             <CardDescription>List of students who took the exam and their grades.</CardDescription>

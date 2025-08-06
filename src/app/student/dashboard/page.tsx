@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -5,20 +6,35 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { courses } from '@/lib/data';
+import { courses as initialCourses } from '@/lib/data';
 import { ArrowRight } from 'lucide-react';
+import type { Course } from '@/lib/types';
 
 export default function StudentDashboard() {
   const [selectedCourse, setSelectedCourse] = useState('');
   const [userName, setUserName] = useState('Student');
+  const [availableExams, setAvailableExams] = useState<Course[]>([]);
   const router = useRouter();
 
   useEffect(() => {
     const storedUser = localStorage.getItem('currentUser');
+    const storedCourses = localStorage.getItem('courses');
+    const allCourses: Course[] = storedCourses ? JSON.parse(storedCourses) : initialCourses;
+
     if (storedUser) {
       const user = JSON.parse(storedUser);
       if (user.role === 'Student') {
         setUserName(user.name);
+
+        const studentCourses = allCourses.filter(course => 
+          course.departmentId === user.department && String(course.level) === user.level
+        );
+        
+        const examsForStudent = studentCourses.filter(course => {
+            return localStorage.getItem(`exam_${course.id}`) !== null;
+        });
+
+        setAvailableExams(examsForStudent);
       }
     }
   }, []);
@@ -39,7 +55,7 @@ export default function StudentDashboard() {
       <Card className="max-w-2xl mx-auto w-full shadow-lg">
         <CardHeader>
           <CardTitle className="font-headline">Start a New Exam</CardTitle>
-          <CardDescription>Choose from your registered courses below.</CardDescription>
+          <CardDescription>Choose from available exams for your registered courses below.</CardDescription>
         </CardHeader>
         <CardContent>
           <Select onValueChange={setSelectedCourse} value={selectedCourse}>
@@ -47,11 +63,15 @@ export default function StudentDashboard() {
               <SelectValue placeholder="Select a course..." />
             </SelectTrigger>
             <SelectContent>
-              {courses.map((course) => (
-                <SelectItem key={course.id} value={course.id}>
-                  {course.code} - {course.title}
-                </SelectItem>
-              ))}
+              {availableExams.length > 0 ? (
+                availableExams.map((course) => (
+                    <SelectItem key={course.id} value={course.id}>
+                    {course.code} - {course.title}
+                    </SelectItem>
+                ))
+              ) : (
+                <div className='p-4 text-sm text-muted-foreground text-center'>No exams currently available for you.</div>
+              )}
             </SelectContent>
           </Select>
         </CardContent>
