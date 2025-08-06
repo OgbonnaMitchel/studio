@@ -1,20 +1,25 @@
 'use client';
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import ExamInterface from "@/components/student/ExamInterface";
 import type { Exam } from "@/lib/types";
 
-export default function ExamPage({ params }: { params: { courseId: string } }) {
+export default function ExamPage() {
+  const params = useParams();
+  const courseId = Array.isArray(params.courseId) ? params.courseId[0] : params.courseId;
   const [exam, setExam] = useState<Exam | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedExam = localStorage.getItem(`exam_${params.courseId}`);
-    if (storedExam) {
-      setExam(JSON.parse(storedExam));
+    if (courseId) {
+      const storedExam = localStorage.getItem(`exam_${courseId}`);
+      if (storedExam) {
+        setExam(JSON.parse(storedExam));
+      }
     }
     setLoading(false);
-  }, [params.courseId]);
+  }, [courseId]);
 
 
   if (loading) {
@@ -27,7 +32,7 @@ export default function ExamPage({ params }: { params: { courseId: string } }) {
 
   return (
     <div>
-      <ExamInterface exam={exam} courseId={params.courseId} />
+      <ExamInterface exam={exam} courseId={courseId} />
     </div>
   );
 }
