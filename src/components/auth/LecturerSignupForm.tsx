@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -13,9 +13,10 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { departments, courses } from '@/lib/data';
+import { departments, courses as allCourses } from '@/lib/data';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Eye, EyeOff } from 'lucide-react';
+import type { Course } from '@/lib/types';
 
 const formSchema = z.object({
     name: z.string().min(2, 'Name is too short'),
@@ -36,11 +37,13 @@ export default function LecturerSignupForm() {
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
+      department: '',
       lecturerId: '',
       password: '',
       confirmPassword: '',
@@ -48,8 +51,19 @@ export default function LecturerSignupForm() {
     },
   });
 
+  const selectedDepartment = form.watch('department');
+
+  useEffect(() => {
+    if (selectedDepartment) {
+      form.setValue('courses', []); // Reset courses when department changes
+      setFilteredCourses(allCourses.filter(c => c.departmentId === selectedDepartment));
+    } else {
+      setFilteredCourses([]);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDepartment]);
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
     // In a real app, you'd save this to a database.
     // For this demo, we'll use localStorage to simulate user accounts.
     localStorage.setItem(`lecturer_${values.lecturerId}`, JSON.stringify(values));
@@ -100,53 +114,55 @@ export default function LecturerSignupForm() {
                     </FormItem>
                 )}
             />
-             <FormField
-              control={form.control}
-              name="courses"
-              render={() => (
-                <FormItem>
-                  <div className="mb-4">
-                    <FormLabel className="text-base">Courses</FormLabel>
-                  </div>
-                  <div className="space-y-2">
-                  {courses.map((item) => (
-                    <FormField
-                      key={item.id}
-                      control={form.control}
-                      name="courses"
-                      render={({ field }) => {
-                        return (
-                          <FormItem
-                            key={item.id}
-                            className="flex flex-row items-start space-x-3 space-y-0"
-                          >
-                            <FormControl>
-                              <Checkbox
-                                checked={field.value?.includes(item.id)}
-                                onCheckedChange={(checked) => {
-                                  return checked
-                                    ? field.onChange([...(field.value || []), item.id])
-                                    : field.onChange(
-                                        field.value?.filter(
-                                          (value) => value !== item.id
-                                        )
-                                      )
-                                }}
-                              />
-                            </FormControl>
-                            <FormLabel className="font-normal">
-                              {item.code} - {item.title}
-                            </FormLabel>
-                          </FormItem>
-                        )
-                      }}
-                    />
-                  ))}
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+             {selectedDepartment && (
+                 <FormField
+                 control={form.control}
+                 name="courses"
+                 render={() => (
+                   <FormItem>
+                     <div className="mb-4">
+                       <FormLabel className="text-base">Courses</FormLabel>
+                     </div>
+                     <div className="space-y-2 max-h-40 overflow-y-auto border p-4 rounded-md">
+                     {filteredCourses.map((item) => (
+                       <FormField
+                         key={item.id}
+                         control={form.control}
+                         name="courses"
+                         render={({ field }) => {
+                           return (
+                             <FormItem
+                               key={item.id}
+                               className="flex flex-row items-start space-x-3 space-y-0"
+                             >
+                               <FormControl>
+                                 <Checkbox
+                                   checked={field.value?.includes(item.id)}
+                                   onCheckedChange={(checked) => {
+                                     return checked
+                                       ? field.onChange([...(field.value || []), item.id])
+                                       : field.onChange(
+                                           field.value?.filter(
+                                             (value) => value !== item.id
+                                           )
+                                         )
+                                   }}
+                                 />
+                               </FormControl>
+                               <FormLabel className="font-normal">
+                                 {item.code} - {item.title}
+                               </FormLabel>
+                             </FormItem>
+                           )
+                         }}
+                       />
+                     ))}
+                     </div>
+                     <FormMessage />
+                   </FormItem>
+                 )}
+               />
+             )}
 
              <FormField
               control={form.control}
