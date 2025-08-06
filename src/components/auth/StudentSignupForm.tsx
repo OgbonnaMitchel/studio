@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -13,8 +13,9 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { departments, levels } from '@/lib/data';
+import { departments as initialDepartments, levels as initialLevels } from '@/lib/data';
 import { Eye, EyeOff } from 'lucide-react';
+import type { Department, Level } from '@/lib/types';
 
 const formSchema = z.object({
     name: z.string().min(2, 'Name is too short'),
@@ -35,6 +36,16 @@ export default function StudentSignupForm() {
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [levels, setLevels] = useState<Level[]>([]);
+
+  useEffect(() => {
+    const storedDepartments = localStorage.getItem('departments');
+    const storedLevels = localStorage.getItem('levels');
+    
+    setDepartments(storedDepartments ? JSON.parse(storedDepartments) : initialDepartments);
+    setLevels(storedLevels ? JSON.parse(storedLevels) : initialLevels);
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

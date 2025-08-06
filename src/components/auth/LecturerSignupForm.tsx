@@ -13,10 +13,10 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { departments, courses as allCourses } from '@/lib/data';
+import { departments as initialDepartments, courses as initialCourses } from '@/lib/data';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Eye, EyeOff } from 'lucide-react';
-import type { Course } from '@/lib/types';
+import type { Course, Department } from '@/lib/types';
 
 const formSchema = z.object({
     name: z.string().min(2, 'Name is too short'),
@@ -37,7 +37,18 @@ export default function LecturerSignupForm() {
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
+
+  useEffect(() => {
+    const storedDepartments = localStorage.getItem('departments');
+    const storedCourses = localStorage.getItem('courses');
+    
+    setDepartments(storedDepartments ? JSON.parse(storedDepartments) : initialDepartments);
+    setAllCourses(storedCourses ? JSON.parse(storedCourses) : initialCourses);
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -61,7 +72,7 @@ export default function LecturerSignupForm() {
       setFilteredCourses([]);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDepartment]);
+  }, [selectedDepartment, allCourses]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     // In a real app, you'd save this to a database.

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -55,10 +55,36 @@ const initialNewCourseState: NewCourseState = {
   departmentIds: [],
 };
 
+function usePersistentState<T>(key: string, initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {
+    const [state, setState] = useState<T>(() => {
+        if (typeof window === 'undefined') {
+            return initialValue;
+        }
+        try {
+            const item = window.localStorage.getItem(key);
+            return item ? JSON.parse(item) : initialValue;
+        } catch (error) {
+            console.error(error);
+            return initialValue;
+        }
+    });
+
+    useEffect(() => {
+        try {
+            window.localStorage.setItem(key, JSON.stringify(state));
+        } catch (error) {
+            console.error(error);
+        }
+    }, [key, state]);
+
+    return [state, setState];
+}
+
+
 export default function DataManagementTabs() {
-  const [departments, setDepartments] = useState<Department[]>(initialDepartments);
-  const [courses, setCourses] = useState<Course[]>(initialCourses);
-  const [levels, setLevels] = useState<Level[]>(initialLevels);
+  const [departments, setDepartments] = usePersistentState<Department[]>('departments', initialDepartments);
+  const [courses, setCourses] = usePersistentState<Course[]>('courses', initialCourses);
+  const [levels, setLevels] = usePersistentState<Level[]>('levels', initialLevels);
 
   const [newDepartment, setNewDepartment] = useState('');
   const [newCourse, setNewCourse] = useState<NewCourseState>(initialNewCourseState);
