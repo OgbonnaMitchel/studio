@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -13,6 +14,7 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { departments, levels } from '@/lib/data';
+import { Eye, EyeOff } from 'lucide-react';
 
 const formSchema = z.object({
     name: z.string().min(2, 'Name is too short'),
@@ -31,6 +33,8 @@ const formSchema = z.object({
 export default function StudentSignupForm() {
   const router = useRouter();
   const { toast } = useToast();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -157,7 +161,18 @@ export default function StudentSignupForm() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
+                    <div className="relative">
+                        <Input type={showPassword ? 'text' : 'password'} placeholder="••••••••" {...field} />
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground"
+                            onClick={() => setShowPassword((prev) => !prev)}
+                        >
+                            {showPassword ? <EyeOff /> : <Eye />}
+                        </Button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -170,7 +185,18 @@ export default function StudentSignupForm() {
                 <FormItem>
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
+                     <div className="relative">
+                        <Input type={showConfirmPassword ? 'text' : 'password'} placeholder="••••••••" {...field} />
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground"
+                            onClick={() => setShowConfirmPassword((prev) => !prev)}
+                        >
+                            {showConfirmPassword ? <EyeOff /> : <Eye />}
+                        </Button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

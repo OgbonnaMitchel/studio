@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -18,6 +19,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
+import { Eye, EyeOff } from 'lucide-react';
 
 const formSchema = z.object({
   lecturerId: z.string().min(1, 'Lecturer ID is required'),
@@ -27,6 +29,7 @@ const formSchema = z.object({
 export default function LecturerLoginForm() {
   const router = useRouter();
   const { toast } = useToast();
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -83,7 +86,18 @@ export default function LecturerLoginForm() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
+                    <div className="relative">
+                      <Input type={showPassword ? 'text' : 'password'} placeholder="••••••••" {...field} />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 text-muted-foreground"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                      >
+                        {showPassword ? <EyeOff /> : <Eye />}
+                      </Button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
