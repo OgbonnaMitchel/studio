@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import {
   Table,
   TableBody,
@@ -30,16 +31,20 @@ function getGradeVariant(grade: string) {
     }
 }
 
-export default function ResultsPage({ params }: { params: { courseId: string } }) {
-  const course = courses.find((c) => c.id === params.courseId);
+export default function ResultsPage() {
+  const params = useParams();
+  const courseId = Array.isArray(params.courseId) ? params.courseId[0] : params.courseId;
+  const course = courses.find((c) => c.id === courseId);
   const [results, setResults] = useState<Result[]>([]);
 
   useEffect(() => {
-    const storedResults = localStorage.getItem(`results_${params.courseId}`);
-    if (storedResults) {
-      setResults(JSON.parse(storedResults));
+    if (courseId) {
+      const storedResults = localStorage.getItem(`results_${courseId}`);
+      if (storedResults) {
+        setResults(JSON.parse(storedResults));
+      }
     }
-  }, [params.courseId]);
+  }, [courseId]);
 
   return (
     <div className="flex flex-col gap-8">
