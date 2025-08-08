@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { courses, departments, levels } from '@/lib/data';
+import { courses as initialCourses, departments, levels } from '@/lib/data';
 import { MoreHorizontal } from 'lucide-react';
 import type { Course } from '@/lib/types';
 
@@ -29,6 +29,9 @@ export default function LecturerDashboard() {
 
   useEffect(() => {
     const storedUser = localStorage.getItem('currentUser');
+    const storedCourses = localStorage.getItem('courses');
+    const courses: Course[] = storedCourses ? JSON.parse(storedCourses) : initialCourses;
+
     if (storedUser) {
       const user = JSON.parse(storedUser);
       if (user.role === 'Lecturer') {
