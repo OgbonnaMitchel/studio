@@ -31,9 +31,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { courses, departments } from '@/lib/data';
+import { courses as initialCourses, departments as initialDepartments } from '@/lib/data';
 import { PlusCircle, Trash2 } from 'lucide-react';
 import { Checkbox } from '../ui/checkbox';
+import { useEffect, useState } from 'react';
+import type { Course } from '@/lib/types';
 
 const questionSchema = z.object({
   questionText: z.string().min(1, 'Question text is required.'),
@@ -63,6 +65,31 @@ type ExamFormValues = z.infer<typeof formSchema>;
 export default function CreateExamForm() {
   const router = useRouter();
   const { toast } = useToast();
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [allCourses, setAllCourses] = useState<Course[]>([]);
+  const [departments, setDepartments] = useState(initialDepartments);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('currentUser');
+    const storedCourses = localStorage.getItem('courses');
+    const storedDepartments = localStorage.getItem('departments');
+
+    const allCourses: Course[] = storedCourses ? JSON.parse(storedCourses) : initialCourses;
+    setAllCourses(allCourses);
+    setDepartments(storedDepartments ? JSON.parse(storedDepartments) : initialDepartments);
+
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      if (user.role === 'Lecturer' && user.courses) {
+        const lecturerCourses = allCourses.filter(course => user.courses.includes(course.id));
+        setCourses(lecturerCourses);
+      } else {
+        setCourses(allCourses);
+      }
+    } else {
+      setCourses(allCourses);
+    }
+  }, []);
 
   const form = useForm<ExamFormValues>({
     resolver: zodResolver(formSchema),
@@ -91,7 +118,7 @@ export default function CreateExamForm() {
   };
 
   function onSubmit(values: ExamFormValues) {
-    const courseDetails = courses.find(c => c.id === values.course);
+    const courseDetails = allCourses.find(c => c.id === values.course);
     if (!courseDetails) {
         toast({
             title: 'Error',
@@ -143,11 +170,15 @@ export default function CreateExamForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {courses.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>
-                          {c.code} - {c.title}
-                        </SelectItem>
-                      ))}
+                      {courses.length > 0 ? (
+                        courses.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.code} - {c.title}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <div className='p-4 text-sm text-muted-foreground text-center'>No courses assigned to you.</div>
+                      )}
                     </SelectContent>
                   </Select>
                   <FormMessage />
