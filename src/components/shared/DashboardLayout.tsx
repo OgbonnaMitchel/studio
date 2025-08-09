@@ -63,6 +63,7 @@ export default function DashboardLayout({
   const { toast } = useToast();
 
   const handleLogout = () => {
+    localStorage.removeItem('currentUser');
     toast({
       title: 'Logged Out',
       description: 'You have been successfully logged out.',
@@ -145,7 +146,7 @@ export default function DashboardLayout({
               </DropdownMenu>
             </div>
           </header>
-          <div className="container p-4 sm:p-6 md:p-8">{children}</div>
+          <div className="p-4 sm:p-6 md:p-8">{children}</div>
         </main>
       </div>
     </SidebarProvider>
