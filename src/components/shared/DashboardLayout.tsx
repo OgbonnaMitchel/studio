@@ -1,3 +1,4 @@
+
 'use client';
 
 import * as React from 'react';
@@ -144,7 +145,7 @@ export default function DashboardLayout({
               </DropdownMenu>
             </div>
           </header>
-          <div className="p-4 sm:p-6 md:p-8">{children}</div>
+          <div className="container p-4 sm:p-6 md:p-8">{children}</div>
         </main>
       </div>
     </SidebarProvider>
