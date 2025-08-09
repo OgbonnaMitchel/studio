@@ -19,15 +19,16 @@ export type Level = {
 
 export type Question = {
   questionText: string;
-  options: string[];
-  correctAnswer: string;
+  options: [string, string, string, string];
+  correctAnswer: 'A' | 'B' | 'C' | 'D';
 };
 
 export type Exam = {
+  course: string;
   courseCode: string;
   courseTitle: string;
   creditUnit: number;
-  department: string[];
+  departments: string[];
   semester: 'Rain' | 'Harmattan';
   session: string;
   duration: number; // in minutes

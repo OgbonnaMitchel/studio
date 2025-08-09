@@ -15,17 +15,42 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { courses as initialCourses, departments, levels } from '@/lib/data';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, Pencil, Trash2, Eye } from 'lucide-react';
 import type { Course } from '@/lib/types';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
 
 export default function LecturerDashboard() {
   const router = useRouter();
+  const { toast } = useToast();
   const [userName, setUserName] = useState('Lecturer');
   const [lecturerCourses, setLecturerCourses] = useState<Course[]>([]);
+  const [examStatus, setExamStatus] = useState<Record<string, boolean>>({});
+
+  const checkExamStatus = () => {
+    const status: Record<string, boolean> = {};
+    lecturerCourses.forEach(course => {
+      const exam = localStorage.getItem(`exam_${course.id}`);
+      status[course.id] = !!exam;
+    });
+    setExamStatus(status);
+  }
 
   useEffect(() => {
     const storedUser = localStorage.getItem('currentUser');
@@ -36,16 +61,39 @@ export default function LecturerDashboard() {
       const user = JSON.parse(storedUser);
       if (user.role === 'Lecturer') {
         setUserName(user.name);
-        // Filter courses based on what the lecturer signed up for
         const assignedCourses = courses.filter(course => user.courses.includes(course.id));
         setLecturerCourses(assignedCourses);
       }
     }
   }, []);
 
+  useEffect(() => {
+    if (lecturerCourses.length > 0) {
+      checkExamStatus();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lecturerCourses]);
+
 
   const handleSetExam = (courseId: string) => {
     router.push(`/lecturer/exam/create?courseId=${courseId}`);
+  };
+
+  const handleEditExam = (courseId: string) => {
+    router.push(`/lecturer/exam/edit/${courseId}`);
+  };
+
+  const handleViewExam = (courseId: string) => {
+    router.push(`/lecturer/exam/view/${courseId}`);
+  };
+
+  const handleDeleteExam = (courseId: string) => {
+    localStorage.removeItem(`exam_${courseId}`);
+    checkExamStatus();
+    toast({
+        title: 'Exam Deleted',
+        description: 'The exam has been successfully deleted.',
+    });
   };
 
   const handleViewResults = (courseId: string) => {
@@ -71,6 +119,7 @@ export default function LecturerDashboard() {
                 <TableHead>Course Title</TableHead>
                 <TableHead>Department</TableHead>
                 <TableHead>Level</TableHead>
+                <TableHead>Exam Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -86,6 +135,13 @@ export default function LecturerDashboard() {
                     <TableCell>
                       {levels.find((l) => l.value === course.level)?.label}
                     </TableCell>
+                    <TableCell>
+                      {examStatus[course.id] ? (
+                        <Badge variant="default">Set</Badge>
+                      ) : (
+                        <Badge variant="secondary">Not Set</Badge>
+                      )}
+                    </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -95,12 +151,32 @@ export default function LecturerDashboard() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleSetExam(course.id)}>
-                            Set Exam
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleViewResults(course.id)}>
-                            View Results
-                          </DropdownMenuItem>
+                          {examStatus[course.id] ? (
+                            <>
+                              <DropdownMenuItem onClick={() => handleViewExam(course.id)}>
+                                <Eye className="mr-2 h-4 w-4" /> View Exam
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleEditExam(course.id)}>
+                                <Pencil className="mr-2 h-4 w-4" /> Edit Exam
+                              </DropdownMenuItem>
+                               <AlertDialogTrigger asChild>
+                                  <DropdownMenuItem 
+                                    className="text-destructive focus:text-destructive"
+                                    onSelect={(e) => e.preventDefault()}
+                                  >
+                                    <Trash2 className="mr-2 h-4 w-4" /> Delete Exam
+                                  </DropdownMenuItem>
+                               </AlertDialogTrigger>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={() => handleViewResults(course.id)}>
+                                View Results
+                              </DropdownMenuItem>
+                            </>
+                          ) : (
+                            <DropdownMenuItem onClick={() => handleSetExam(course.id)}>
+                              Set Exam
+                            </DropdownMenuItem>
+                          )}
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -108,13 +184,35 @@ export default function LecturerDashboard() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center">
+                  <TableCell colSpan={6} className="text-center">
                     You have not been assigned any courses yet.
                   </TableCell>
                 </TableRow>
               )}
             </TableBody>
           </Table>
+
+          <AlertDialog>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete the exam for this course. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                {lecturerCourses.find(c => examStatus[c.id]) && (
+                  <AlertDialogAction 
+                    onClick={() => handleDeleteExam(lecturerCourses.find(c => examStatus[c.id])!.id)}
+                    className="bg-destructive hover:bg-destructive/90"
+                  >
+                    Delete
+                  </AlertDialogAction>
+                )}
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </CardContent>
       </Card>
     </div>

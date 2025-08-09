@@ -3,7 +3,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useFieldArray } from 'react-hook-form';
 import * as z from 'zod';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Form,
   FormControl,
@@ -35,7 +35,7 @@ import { courses as initialCourses, departments as initialDepartments } from '@/
 import { PlusCircle, Trash2 } from 'lucide-react';
 import { Checkbox } from '../ui/checkbox';
 import { useEffect, useState } from 'react';
-import type { Course } from '@/lib/types';
+import type { Course, Exam } from '@/lib/types';
 
 const questionSchema = z.object({
   questionText: z.string().min(1, 'Question text is required.'),
@@ -62,12 +62,21 @@ const formSchema = z.object({
 
 type ExamFormValues = z.infer<typeof formSchema>;
 
-export default function CreateExamForm() {
+interface CreateExamFormProps {
+    existingExam?: Exam | null;
+    courseId?: string;
+}
+
+export default function CreateExamForm({ existingExam = null, courseId: propCourseId }: CreateExamFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
   const [courses, setCourses] = useState<Course[]>([]);
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [departments, setDepartments] = useState(initialDepartments);
+
+  const courseId = propCourseId || searchParams.get('courseId');
+  const isEditMode = !!existingExam;
 
   useEffect(() => {
     const storedUser = localStorage.getItem('currentUser');
@@ -93,8 +102,14 @@ export default function CreateExamForm() {
 
   const form = useForm<ExamFormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      course: '',
+    defaultValues: isEditMode && existingExam ? {
+      ...existingExam,
+      course: courseId || '',
+      creditUnit: String(existingExam.creditUnit),
+      duration: existingExam.duration,
+      departments: existingExam.departments,
+    } : {
+      course: courseId || '',
       creditUnit: '',
       departments: [],
       semester: 'Harmattan',
@@ -118,7 +133,14 @@ export default function CreateExamForm() {
   };
 
   function onSubmit(values: ExamFormValues) {
-    const courseDetails = allCourses.find(c => c.id === values.course);
+    const finalCourseId = values.course || courseId;
+    
+    if (!finalCourseId) {
+        toast({ title: "Error", description: "Course ID is missing.", variant: "destructive" });
+        return;
+    }
+
+    const courseDetails = allCourses.find(c => c.id === finalCourseId);
     if (!courseDetails) {
         toast({
             title: 'Error',
@@ -132,13 +154,14 @@ export default function CreateExamForm() {
         ...values,
         courseCode: courseDetails.code,
         courseTitle: courseDetails.title,
+        creditUnit: Number(values.creditUnit),
     };
     
-    localStorage.setItem(`exam_${values.course}`, JSON.stringify(examData));
+    localStorage.setItem(`exam_${finalCourseId}`, JSON.stringify(examData));
     
     toast({
-      title: 'Exam Created Successfully!',
-      description: 'The exam has been set and is ready for students.',
+      title: isEditMode ? 'Exam Updated Successfully!' : 'Exam Created Successfully!',
+      description: isEditMode ? 'The exam has been updated.' : 'The exam has been set and is ready for students.',
     });
     router.push('/lecturer/dashboard');
   }
@@ -150,7 +173,7 @@ export default function CreateExamForm() {
           <CardHeader>
             <CardTitle className="font-headline">Exam Details</CardTitle>
             <CardDescription>
-              Define the parameters for your new exam.
+              {isEditMode ? 'Edit the parameters for your exam.' : 'Define the parameters for your new exam.'}
             </CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -163,6 +186,7 @@ export default function CreateExamForm() {
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
+                    disabled={!!courseId}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -191,7 +215,7 @@ export default function CreateExamForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Credit Unit</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl><SelectTrigger><SelectValue placeholder="Select credit unit" /></SelectTrigger></FormControl>
                     <SelectContent>
                         <SelectItem value="2">2</SelectItem>
@@ -243,7 +267,7 @@ export default function CreateExamForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Semester</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                     <SelectContent>
                         <SelectItem value="Harmattan">Harmattan</SelectItem>
@@ -330,7 +354,7 @@ export default function CreateExamForm() {
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Correct Answer</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <Select onValueChange={field.onChange} value={field.value}>
                                         <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                                         <SelectContent>
                                             <SelectItem value="A">A</SelectItem>
@@ -356,7 +380,7 @@ export default function CreateExamForm() {
 
         <div className="flex justify-end">
           <Button type="submit" size="lg" className="bg-accent hover:bg-accent/90">
-            Create Exam
+            {isEditMode ? 'Update Exam' : 'Create Exam'}
           </Button>
         </div>
       </form>
