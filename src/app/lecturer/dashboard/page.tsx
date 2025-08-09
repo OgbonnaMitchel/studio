@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -143,42 +144,62 @@ export default function LecturerDashboard() {
                       )}
                     </TableCell>
                     <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          {examStatus[course.id] ? (
-                            <>
-                              <DropdownMenuItem onClick={() => handleViewExam(course.id)}>
-                                <Eye className="mr-2 h-4 w-4" /> View Exam
+                      <AlertDialog>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Open menu</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {examStatus[course.id] ? (
+                              <>
+                                <DropdownMenuItem onClick={() => handleViewExam(course.id)}>
+                                  <Eye className="mr-2 h-4 w-4" /> View Exam
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleEditExam(course.id)}>
+                                  <Pencil className="mr-2 h-4 w-4" /> Edit Exam
+                                </DropdownMenuItem>
+                                <AlertDialogTrigger asChild>
+                                    <DropdownMenuItem
+                                      className="text-destructive focus:text-destructive"
+                                      onSelect={(e) => e.preventDefault()}
+                                    >
+                                      <Trash2 className="mr-2 h-4 w-4" /> Delete Exam
+                                    </DropdownMenuItem>
+                                </AlertDialogTrigger>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => handleViewResults(course.id)}>
+                                  View Results
+                                </DropdownMenuItem>
+                              </>
+                            ) : (
+                              <DropdownMenuItem onClick={() => handleSetExam(course.id)}>
+                                Set Exam
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleEditExam(course.id)}>
-                                <Pencil className="mr-2 h-4 w-4" /> Edit Exam
-                              </DropdownMenuItem>
-                               <AlertDialogTrigger asChild>
-                                  <DropdownMenuItem 
-                                    className="text-destructive focus:text-destructive"
-                                    onSelect={(e) => e.preventDefault()}
-                                  >
-                                    <Trash2 className="mr-2 h-4 w-4" /> Delete Exam
-                                  </DropdownMenuItem>
-                               </AlertDialogTrigger>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={() => handleViewResults(course.id)}>
-                                View Results
-                              </DropdownMenuItem>
-                            </>
-                          ) : (
-                            <DropdownMenuItem onClick={() => handleSetExam(course.id)}>
-                              Set Exam
-                            </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This will permanently delete the exam for this course. This action cannot be undone.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => handleDeleteExam(course.id)}
+                              className="bg-destructive hover:bg-destructive/90"
+                            >
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </TableCell>
                   </TableRow>
                 ))
@@ -191,28 +212,6 @@ export default function LecturerDashboard() {
               )}
             </TableBody>
           </Table>
-
-          <AlertDialog>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will permanently delete the exam for this course. This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                {lecturerCourses.find(c => examStatus[c.id]) && (
-                  <AlertDialogAction 
-                    onClick={() => handleDeleteExam(lecturerCourses.find(c => examStatus[c.id])!.id)}
-                    className="bg-destructive hover:bg-destructive/90"
-                  >
-                    Delete
-                  </AlertDialogAction>
-                )}
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
         </CardContent>
       </Card>
     </div>
