@@ -79,7 +79,7 @@ export default function ViewExamPage() {
                         isCorrect ? 'bg-green-100 dark:bg-green-900/50' : 'bg-transparent'
                       }`}
                     >
-                      {isCorrect ? <Check className="h-4 w-4 mr-2 text-green-600" /> : <X className="h-4 w-4 mr-2 text-red-500" />}
+                      {isCorrect ? <Check className="h-4 w-4 mr-2 text-green-600" /> : <X className="h-4 w-4 mr-2 text-red-500 opacity-20" />}
                       <span>{optionLetter}. {option}</span>
                     </div>
                   );

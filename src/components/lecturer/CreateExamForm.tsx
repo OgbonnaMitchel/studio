@@ -309,7 +309,7 @@ export default function CreateExamForm({ existingExam = null, courseId: propCour
                     <div>
                         <CardTitle className="font-headline">Exam Questions</CardTitle>
                         <CardDescription>
-                        Add questions manually for the exam.
+                        {isEditMode ? 'Edit the questions for this exam.' : 'Add questions manually for the exam.'}
                         </CardDescription>
                     </div>
                 </div>
@@ -326,7 +326,7 @@ export default function CreateExamForm({ existingExam = null, courseId: propCour
                             name={`questions.${index}.questionText`}
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Question</FormLabel>
+                                    <FormLabel>Question Text</FormLabel>
                                     <FormControl><Input placeholder="Enter question text" {...field} /></FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -372,7 +372,7 @@ export default function CreateExamForm({ existingExam = null, courseId: propCour
                 <Button type="button" variant="outline" onClick={handleAddQuestion} className="w-full">
                     <PlusCircle className="mr-2 h-4 w-4" /> Add Question
                 </Button>
-                {form.formState.errors.questions && (
+                {form.formState.errors.questions && !form.formState.errors.questions.root && (
                   <p className="text-sm font-medium text-destructive">{form.formState.errors.questions.message}</p>
                 )}
             </CardContent>
