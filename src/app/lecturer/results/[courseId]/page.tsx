@@ -23,6 +23,7 @@ type Result = {
     name: string;
     reg: string;
     score: number;
+    totalQuestions: number;
     grade: string;
 };
 
@@ -92,7 +93,7 @@ export default function ResultsPage() {
                 <TableRow>
                     <TableHead>Student Name</TableHead>
                     <TableHead>Registration No.</TableHead>
-                    <TableHead>Score (%)</TableHead>
+                    <TableHead>Score</TableHead>
                     <TableHead>Grade</TableHead>
                 </TableRow>
                 </TableHeader>
@@ -102,7 +103,7 @@ export default function ResultsPage() {
                         <TableRow key={result.reg}>
                         <TableCell className="font-medium">{result.name}</TableCell>
                         <TableCell>{result.reg}</TableCell>
-                        <TableCell>{result.score}</TableCell>
+                        <TableCell>{`${result.score}/${result.totalQuestions}`}</TableCell>
                         <TableCell>
                             <Badge variant={getGradeVariant(result.grade)}>{result.grade}</Badge>
                         </TableCell>

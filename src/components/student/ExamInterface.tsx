@@ -69,13 +69,15 @@ export default function ExamInterface({ exam, courseId }: ExamInterfaceProps) {
             score++;
         }
     });
-
-    const { grade, percentage } = getGrade(score, exam.questions.length);
+    
+    const totalQuestions = exam.questions.length;
+    const { grade } = getGrade(score, totalQuestions);
 
     const result = {
         name: user.name,
         reg: user.regNumber,
-        score: percentage.toFixed(0),
+        score: score,
+        totalQuestions: totalQuestions,
         grade,
     };
     
