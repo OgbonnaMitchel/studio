@@ -35,7 +35,7 @@ import { courses as initialCourses, departments as initialDepartments } from '@/
 import { PlusCircle, Trash2 } from 'lucide-react';
 import { Checkbox } from '../ui/checkbox';
 import { useEffect, useState } from 'react';
-import type { Course, Exam } from '@/lib/types';
+import type { Course, Department, Exam } from '@/lib/types';
 
 const questionSchema = z.object({
   questionText: z.string().min(1, 'Question text is required.'),
@@ -73,7 +73,7 @@ export default function CreateExamForm({ existingExam = null, courseId: propCour
   const { toast } = useToast();
   const [courses, setCourses] = useState<Course[]>([]);
   const [allCourses, setAllCourses] = useState<Course[]>([]);
-  const [departments, setDepartments] = useState(initialDepartments);
+  const [departments, setDepartments] = useState<Department[]>([]);
 
   const courseId = propCourseId || searchParams.get('courseId');
   const isEditMode = !!existingExam;
@@ -83,20 +83,20 @@ export default function CreateExamForm({ existingExam = null, courseId: propCour
     const storedCourses = localStorage.getItem('courses');
     const storedDepartments = localStorage.getItem('departments');
 
-    const allCourses: Course[] = storedCourses ? JSON.parse(storedCourses) : initialCourses;
-    setAllCourses(allCourses);
+    const allCoursesData: Course[] = storedCourses ? JSON.parse(storedCourses) : initialCourses;
+    setAllCourses(allCoursesData);
     setDepartments(storedDepartments ? JSON.parse(storedDepartments) : initialDepartments);
 
     if (storedUser) {
       const user = JSON.parse(storedUser);
       if (user.role === 'Lecturer' && user.courses) {
-        const lecturerCourses = allCourses.filter(course => user.courses.includes(course.id));
+        const lecturerCourses = allCoursesData.filter(course => user.courses.includes(course.id));
         setCourses(lecturerCourses);
       } else {
-        setCourses(allCourses);
+        setCourses(allCoursesData);
       }
     } else {
-      setCourses(allCourses);
+      setCourses(allCoursesData);
     }
   }, []);
 
