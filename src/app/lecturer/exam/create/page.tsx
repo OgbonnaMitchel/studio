@@ -1,4 +1,6 @@
+
 import CreateExamForm from "@/components/lecturer/CreateExamForm";
+import { Suspense } from "react";
 
 export default function CreateExamPage() {
   return (
@@ -7,7 +9,9 @@ export default function CreateExamPage() {
         <h1 className="font-headline text-3xl font-bold tracking-tight">Set a New Exam</h1>
         <p className="text-muted-foreground">Fill out the form below to create a new examination.</p>
       </header>
-      <CreateExamForm />
+      <Suspense fallback={<div>Loading...</div>}>
+        <CreateExamForm />
+      </Suspense>
     </div>
   );
 }
